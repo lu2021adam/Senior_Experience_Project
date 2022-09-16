@@ -1,0 +1,149 @@
+---
+title: "Cayman Islands Species Abundance Analysis"
+author: "Adam Bruce"
+date: "09/04/2022"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.height = 3, fig.width = 6)
+library(tidyverse)
+library(knitr)
+library(dplyr)
+library(corrplot)
+library(skimr)
+library(grid)
+library(gridExtra)
+library(tidyselect)
+library(selectr)
+library(ISLR)
+library(forcats)
+library(corrplot)
+library(MASS) 
+library(ggplot2)
+library(kableExtra)
+library(caret)
+library(grid)
+library(openintro)
+library(tidyverse)
+library(ISLR)
+library(caret)
+library(recipes)
+library(glmnet)
+library(gam)
+library(splines)
+library(earth)
+library(rpart)
+library(rpart.plot)
+library(ipred)
+library(e1071)
+library(ranger)
+library(pls)
+library(datasets)
+library(DescTools) 
+library(Hmisc)
+library(e1071)
+library(pwr)
+library(gapminder)
+library(car) 
+library(tibble)
+library(onewaytests) 
+library(rptR) 
+library(esc) 
+library(broom) 
+library(MASS) 
+library(corrgram) 
+library(rcompanion)
+library(FSA)
+library(lmtest) 
+
+
+
+
+
+set.seed(09042022)
+```
+
+
+
+
+
+
+## Abstract
+
+
+
+
+
+\newpage
+
+## Introduction
+
+Since 1998, Lawrence University Professor Bart De Stasio has led a Marine Term trip to Grand Cayman Island in the Western Caribbean. The objective of this trip has been to document abundance and diversity of fish species, provide evidence towards the health of coral reefs surrounding the island, and to understand the ecological relationships between the fish and coral reef environments. To accomplish this, students on the trip used Reef Environmental Education Foundation (REEF) specification to collect data on 246 fish species at 12 different coral reefs. On each dive, data collection lasted approximately 20 to 50 minutes depending on diver air consumption and non-decompression limits (Timpe, 2018). One of the key variables related to the abundance and diversity of fish was Density Index (Den). 
+
+Den was recorded as a measure of how many of a certain species was present at each site during each dive. Ultimately, the scale of Den ranged from 0 to 4, and each whole number represented a REEF category of density. These four categories were Single (S), Few (F), Many (M), and Abundant (A). A Den score of 1 corresponded to S, 2 corresponded to Few, 3 represented Many, and the highest score of 4 was Abundant. Since there were often several dives at a single site, the Den scores for an individual species were averaged to calculate an overall Den for that site each year. REEF provides an outline for performing this calculation and for understanding the specification for each of the four categories. This outline can be seen in the image below. 
+
+## REEF Density Index Categorization and Average Calculation
+
+![REEF](~/Desktop/IS_CAPSTONE/DEN_STANDARDS.png)
+As I proceed, I will perform a statistical analysis, using methods like the T-Test, to describe important details about similarities and difference in DENSITY_INDEX for these fish species. Additionally, I will use linear mixed effect models, since the data is recorded longitudinally, to investigate both how species density has changed within each dive site and how species density has changed between the dive sites. Finally, I will build a machine learning model to best predict a fish species based on OOBE/RMSE comparison metrics. This will allow future researchers to understand what species they might expect to find under certain conditions on the island. Collectively, these results will help explain how the ecology of coral reef fish species has changed over time on Grand Cayman Island. 
+
+## Initial Data Wrangling
+
+```{r}
+CAYMAN_FISH <- read_csv("~/Desktop/IS_CAPSTONE/SINGLE_CAYMAN_FISH_DATA.csv")
+
+
+CAYMAN_FISH_TIDY <- CAYMAN_FISH %>% 
+  pivot_longer(cols = c("1998/CH", "1998/DG", "1998/SB", "1998/SC", "1998/TF", "2000/CP", "2000/DG",	"2000/SC",	"2000/CH",	"2000/SB",	"2000/TF",	"2000/SV",	"2000/BB",	"2002/BB",	"2002/DG",	"2002/SB",	"2002/SC",	"2002/SV",	"2002/CP",	"2002/TF",	"2004/CP",	"2004/DG",	"2004/SC",	"2004/SB",	"2004/HM",	"2004/SV",	"2004/BB",	"2006/CR",	"2006/DG",	"2006/CP",	"2006/SB",	"2006/SC",	"2006/SH",	"2006/SV",	"2006/TF",	"2008/BB",	"2008/CP",	"2008/CR",	"2008/DG",	"2008/SC",	"2008/SH",	"2008/SV",	"2008/TF",	"2010/CP",	"2010/CR",	"2010/DG",	"2010/HM",	"2010/SB",	"2010/SC",	"2010/SH",	"2010/SV",	"2010/TF",	"2012/BB",	"2012/CP",	"2012/CR",	"2012/DG",	"2012/ER",	"2012/SV",	"2012/SC",	"2012/SB",	"2012/SH",	"2012/TF",	"2014/BB",	"2014/CP",	"2014/CR",	"2014/CH",	"2014/DG",	"2014/SV",	"2014/SC",	"2014/SB",	"2014/SH",	"2014/TF",	"2016/SC",	"2016/DG",	"2016/CR",	"2016/SH",	"2016/SV",	"2016/CP",	"2016/TF",	"2016/CH",	"2016/SB",	"2016/ER",	"2018/BB",	"2018/CP",	"2018/CR",	"2018/DG",	"2018/ER",	"2018/SV",	"2018/SC",	"2018/SB",	"2018/SH",	"2018/TF"), 
+  names_to = "YEAR/LOCATION", values_to = "DENSITY_INDEX") %>%
+  separate(col = "YEAR/LOCATION", into = c("YEAR", "LOCATION"), sep = "/")
+
+CAYMAN_FISH_TIDY$YEAR <- as.numeric(CAYMAN_FISH_TIDY$YEAR)
+
+CAYMAN_FISH_TIDY <- CAYMAN_FISH_TIDY[!(CAYMAN_FISH_TIDY$DENSITY_INDEX >= 4.0),]
+
+```
+
+Initially, data consisted of 246 rows and 95 columns. However, the data set was not in tidy form as information on one variable, Density Index, was spread across many columns. These columns were also labeled by year and location, which meant they needed to be separated into individual variables. To tidy the data, I used the concepts of pivoting and separating. First, I made the Density Index variable (DENSITY_INDEX) using the `pivot_longer` function. This function condensed the columns into one hence making the data set "longer". Next, I used the `seperate` function to make individual variable columns for the location and year each observation was collected. Finally, YEAR was coded as a character variable and I changed it to numeric. After this, the data set consisted of 22,632 rows and 5 columns. However, some of the Density Index values followed an outdated version of the REEF scale. So, values greater than the 4.0 threshold were removed.
+
+```{r}
+head(CAYMAN_FISH_TIDY)
+```
+
+The `head` function shows that the five variables consist of two character variables in SPECIES_NAME and LOCATION, and three numeric variables in FISH_ID, YEAR, and DENSITY_INDEX. Overall, 12 locations were studied throughout the duration of data collection. These sites include, from southeast clockwise to northeast, Bodden Bay Lagoon (BL), Beach Bay (BB), Smith’s Cove (SC), Sunset House (SH), Sea View (SV), Casuarina Point (CP), Devil’s Grotto (DG), Eden’s Rock (ER), Cemetery Reef (CR), Turtle Farm (TF), Spanish Bay (SB), and Mangroves (MG). A majority of these sites were described and shown geographically in 2018 by Alec Timpe, a Marine Term student of Professor De Stasio. His dive site image and site description paper can be seen below. 
+![DIVE_SITES](~/Desktop/IS_CAPSTONE/CAYMAN_MAP.png)
+
+Right click to copy the link, then paste into a web browser: 
+[Timpe_Description](file:///Users/adam.bruce/Desktop/IS_CAPSTONE/TIMPE_DESCRIPTION.pdf)
+
+
+
+
+
+## Exploratory Analysis 
+
+```{r}
+
+MEAN_DEN_SPECIES <- CAYMAN_FISH_TIDY %>% group_by(YEAR, SPECIES_NAME) %>% summarise(MEAN_DEN = mean(DENSITY_INDEX), STD_DENSITY = sd(DENSITY_INDEX)) %>% filter(MEAN_DEN >= 2.50 & MEAN_DEN <= 4.0) %>% arrange(desc(MEAN_DEN))
+
+MOST_MEAN_DEN_SPECIES <- head(MEAN_DEN_SPECIES)
+
+kable(MEAN_DEN_SPECIES, caption="Species With an Average Density Index Across All Dive Sites of 2.5 or Greater by Year")
+
+
+
+```
+
+
+```{r, fig.cap="REEF Fish Density Index at Twelve Sampling Location on Grand Cayman Island"}
+
+ggplot(data=CAYMAN_FISH_TIDY, aes(x=DENSITY_INDEX)) + geom_histogram(color="firebrick1", fill = "red4", bins = 10) + facet_wrap(~LOCATION) +  xlim(0,5) + ylim(0,300) + ylab("Frequency") + xlab("Density Index")
+
+```
+
+
