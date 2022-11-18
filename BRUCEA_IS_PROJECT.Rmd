@@ -5,6 +5,13 @@ date: '2022-11-01'
 output: html_document
 ---
 
+---
+title: "Cayman Islands Species Abundance Analysis"
+author: "Adam Bruce"
+date: '2022-11-01'
+output: html_document
+---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 6)
 library(tidyverse)
@@ -190,10 +197,6 @@ CAYMAN_FISH_TIDY <- CAYMAN_FISH_TIDY %>% mutate(SCIENTIFIC_FAMILY = case_when(
 )) %>% dplyr::select(SPECIES_NAME, FISH_ID, SCIENTIFIC_FAMILY, YEAR, DIET, LOCATION, MARINE_RESERVE, DENSITY_INDEX)
 
 CAYMAN_FISH_TIDY
-
-CAYMAN_FISH_TIDY %>% filter(SPECIES_NAME %in% c("Reef Squirrelfish", "Squirrelfish", "Longjaw Squirrelfish", "Longspine Squirrelfish", "Dusky Squirrelfish", "Blackbar Soldierfish"))
-
-CAYMAN_FISH_TIDY %>% filter(SPECIES_NAME %in% c("Threespot Damselfish", "Rock Beauty", "Blue Chromis", "Sergeant Major", "Longfin Damselfish", "Dusky Damselfish", "Sunshinefish", "Bicolor Damselfish", "Yellowtail Damselfish", "Brown Chromis", "Yellowtail Reeffish", "Cocoa Damselfish", "Beaugregory", "Purple Reeffish"))
 
 ```
 ### Unique Datasets 
@@ -936,11 +939,14 @@ M6_LMER <- lmer(DENSITY_INDEX ~ YEAR1998 + DIET + SCIENTIFIC_FAMILY + (YEAR1998|
 
 AIC(M3_LMER, M6_LMER)
 
+AIC(M5_LMER, M6_LMER)
+
 #### Check the summary of the plot then bootstrap accordingly
 
 summary(Unconditional_Mean)
 summary(Unconditional_Growth)
 summary(M6_LMER)
+summary(M5_LMER)
 
 ### FINAL MODEL = M6_LMER, Check assumptions plot
 
@@ -1762,10 +1768,3 @@ kable(Surgeon_Time, booktabs = T,
   kable_styling(full_width = T)
 
 ```
-
-
-
-
-
-
-
