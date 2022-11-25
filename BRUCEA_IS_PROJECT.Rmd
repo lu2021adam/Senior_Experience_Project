@@ -5,13 +5,6 @@ date: '2022-11-01'
 output: html_document
 ---
 
----
-title: "Cayman Islands Species Abundance Analysis"
-author: "Adam Bruce"
-date: '2022-11-01'
-output: html_document
----
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.height = 5, fig.width = 6)
 library(tidyverse)
@@ -744,6 +737,31 @@ exp(-2.18 + 2.17520)/(1+exp(-2.18 + 2.17520))
 exp(-2.18 + 1.58743)/(1+exp(-2.18 + 1.58743))
 
 exp(-2.18 + 0.77282)/(1+exp(-2.18 + 0.77282))
+```
+
+### KABLES FOR LOGISTIC OUTPUTS
+
+```{r}
+
+LogiFamily_Name <- c("Apogonidae", "Carangidae", "Gobiidae", "Sparidae", "Haemulidae", "Holocentridae", "Labridae", "Lutjanidae", "Pomacentridae", "Scaridae", "Serranidae", "Other")
+
+LogiModel_Pval <- c("2e-16", "0.683", "0.266", "0.351", "0.000229", "2e-16", "9.14e-14", "2e-16", "1.86e-12", "2e-16", "2e-16", "2.71e-7")
+
+LogiProbability_NonZero <- c("0.102 (10.2%)", "0.102 (10.2%)", "0.102 (10.2%)", "0.102 (10.2%)", "0.169 (16.9%)", "0.510 (51.0%)", "0.264 (26.4%)", "0.311 (31.1%)", "0.499 (49.9%)", "0.356 (35.6%)", "0.197 (19.7%)", "0.238 (23.8%)")
+
+
+
+LOGISTIC_INTERPRETATIONS <- as.data.frame(cbind(LogiFamily_Name, LogiModel_Pval, LogiProbability_NonZero)) 
+
+
+### KABLES FOR THESE SPECIES
+
+
+kable(LOGISTIC_INTERPRETATIONS, booktabs = T, 
+      caption = "Logistic Regression Probabilities of Non-Zero Observations By Families",
+      col.names = c("Family", "Model P-Value", "Probability Non-Zero")) %>%
+  kable_styling(full_width = T)
+
 ```
 
 
@@ -1744,27 +1762,31 @@ Surgeon_Time
 ```{r}
 kable(Lionfish_Time, booktabs = T, 
       caption = "Density Index K-Means Cluster Movements of the Lionfish",
-      col.names = c("Species", "Year", "Cluster Classification", "Cluster Center")) %>%
+      col.names = c("Species", "Year", "Cluster", "Cluster Center")) %>%
   kable_styling(full_width = T)
 
 kable(Snapper_Time, booktabs = T, 
       caption = "Density Index K-Means Cluster Movements of the Mahogony Snapper",
-      col.names = c("Species", "Year", "Cluster Classification", "Cluster Center")) %>%
+      col.names = c("Species", "Year", "Cluster", "Cluster Center")) %>%
   kable_styling(full_width = T)
 
 kable(Groupers_Time, booktabs = T, 
       caption = "Density Index K-Means Cluster Movements of the Nassau Grouper",
-      col.names = c("Species", "Year", "Cluster Classification", "Cluster Center")) %>%
+      col.names = c("Species", "Year", "Cluster", "Cluster Center")) %>%
   kable_styling(full_width = T)
 
 kable(Parrots_Time, booktabs = T, 
       caption = "Density Index K-Means Cluster Movements of the Rainbow Parrotfish",
-      col.names = c("Species", "Year", "Cluster Classification", "Cluster Center")) %>%
+      col.names = c("Species", "Year", "Cluster", "Cluster Center")) %>%
   kable_styling(full_width = T)
 
 kable(Surgeon_Time, booktabs = T, 
       caption = "Density Index K-Means Cluster Movements of the Ocean Surgeonfish",
-      col.names = c("Species", "Year", "Cluster Classification", "Cluster Center")) %>%
+      col.names = c("Species", "Year", "Cluster", "Cluster Center")) %>%
   kable_styling(full_width = T)
 
 ```
+
+
+
+
